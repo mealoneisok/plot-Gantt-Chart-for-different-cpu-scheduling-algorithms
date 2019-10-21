@@ -1,4 +1,4 @@
-# CPU Scheduling Algorithm and its Gnatt's Charts
+# CPU Scheduling Algorithm and its Gnatt's Chart
 
 # Description
 
@@ -21,9 +21,15 @@ Consider the following processes:
 |    P5   |      17      |      5     |     6    |
 |    P6   |      21      |      4     |     3    |
 
-Draw Gantt charts for the scheduling algorithms FCFS, SJF, SRTF, Non-Preemptive priority (smaller priority higher priority), RR (time quantum = 5).
+Draw Gantt charts for the scheduling algorithms 
+* FCFS, 
+* SJF, 
+* SRTF, 
+* Non-Preemptive priority (smaller priority higher priority), 
+* Preemptive priority, 
+* RR (time quantum = 5)
 
-Solution with the code: 
+Solution with the code
 
 ```python
 cpus = CPUScheduler(burst_time = [8, 1, 7, 7, 5, 4],
@@ -36,12 +42,12 @@ pgc = ProcessGnattChart()
 for i, (algo, pre, tq) in enumerate(zip(['fcfs', 'sjf', 'sjf', 'min_priority', 'min_priority', 'rr'], 
                                         [False, False, True, False, True, False], 
                                         [1, 1, 1, 1, 1, 5])):
-  prog, summary = cpus2.transform(scheme = algo, preemptive = pre, time_quantum = tq)
+  prog, summary = cpus.transform(scheme = algo, preemptive = pre, time_quantum = tq)
   pgc.transform(prog, gnt = gnt[i // 2, i % 2], title = algo)
   plt.show(fig)
 ```
 
-Should result in
+should result in
 ![gnatt](./gnatt.png)
 
 
