@@ -63,7 +63,7 @@ should result in
 | P3 | 2 | 3 |
 | P4 | 4 | 1 |
 
-```
+```python
 import pandas as pd
 cpus = CPUScheduler(burst_time = [5, 3, 3, 1],
                     arrival_time = [0, 1, 2, 4], 
