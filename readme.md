@@ -2,7 +2,7 @@
 
 # Description
 
-A f****** course asked me to draw the Gnatt's charts according to specific arrival time, burst time, priority of some processes so I made this program to answer it.
+A f****** course asked me to draw the Gnatt's charts for different cpu scheduling algorithms according to specific arrival time, burst time, priority of some processes so I made this program to answer it.
 
 # How
 
@@ -10,7 +10,7 @@ Requirement: Python3 with matplotlib and pandas installed
 
 Available CPU scheduling algorithm: fcfs, sjf, rr, priority(min or max)
 
-Use CPUScheduler to find the progress detail, summary and use ProcessGnattChart to plot the Gnatt's Chart
+Find the progress detail and summary with CPUScheduler and plot the Gnatt's Chart with ProcessGnattChart
 
 # Example
 
