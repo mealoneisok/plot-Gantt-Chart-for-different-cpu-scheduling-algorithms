@@ -51,7 +51,7 @@ class CPUScheduler:
         
         Outputs
         -------
-        prog : process progress details, used in plotting Gnatt's chart
+        prog : process progress details, used in plotting Gantt chart
         summary : process summary, including wt (waiting time), tat (turnaround time) and rt (response time)
         '''
         scheme = scheme.lower()
@@ -143,7 +143,7 @@ class CPUScheduler:
             time = et
         return prog, summary 
 
-class ProcessGnattChart:    
+class ProcessGanttChart:    
     def transform(self, prog, gnt = None, title = 'cpu scheduling'):
         prc = sorted(set([p['pid'] for p in prog]))
         prc_cnts = len(prc)
@@ -172,7 +172,7 @@ class ProcessGnattChart:
 if __name__ == '__main__':
     cpus = CPUScheduler(burst_time = [8, 1, 7, 7, 5, 4])
     prog, summ = cpus.transform(scheme = 'sjf', preemptive = False)
-    pgc = ProcessGnattChart()
+    pgc = ProcessGanttChart()
     gnt = pgc.transform(prog, title = 'sjf, nonpreemptive')
     plt.show(gnt)
 
@@ -182,7 +182,7 @@ if __name__ == '__main__':
                         pid = ['P1', 'P2', 'P3', 'P4', 'P5', 'P6'])
     
     fig, gnt = plt.subplots(ncols = 2, nrows = 3, figsize = (15, 15))
-    pgc = ProcessGnattChart()
+    pgc = ProcessGanttChart()
     for i, (algo, pre, tq) in enumerate(zip(['fcfs', 'sjf', 'sjf', 'min_priority', 'min_priority', 'rr'], 
                                             [False, False, True, False, True, False], 
                                             [1, 1, 1, 1, 1, 5])):
