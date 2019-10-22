@@ -2,7 +2,6 @@ import copy
 import math
 import matplotlib.pyplot as plt
 
-import copy
 class CPUScheduler:
     def __init__(self, burst_time, priority = [], arrival_time = [], pid = []):
         '''
@@ -22,8 +21,12 @@ class CPUScheduler:
             pid = pid or list(range(self.cnt_jobs))
         if arrival_time and len(arrival_time) != self.cnt_jobs:
             raise ValueError('the length of arrival_time does not equal the job count: {}.'.format(self.cnt_jobs))
-        else:
+        elif not arrival_time:
             arrival_time = arrival_time or [0] * self.cnt_jobs
+        else:
+            for i in range(self.cnt_jobs): #make sure arrival_time is in ascending order
+                if i < self.cnt_jobs - 1 and arrival_time[i] > arrival_time[i + 1]:
+                    raise ValueError('arrival_time must be in ascending order.')
         if priority and len(priority) != self.cnt_jobs:
             raise ValueError('the length of priority does not equal the job count: {}.'.format(self.cnt_jobs))
         else:
@@ -67,13 +70,10 @@ class CPUScheduler:
         
         while cnt_job_done != self.cnt_jobs:
             if rjobs:
-                if scheme != 'rr' and not ready_q and rjobs[0]['at'] > time: #cpu idle, move to next arrival time
+                if curr_job is None and not ready_q and rjobs[0]['at'] > time: #cpu idle, move to next arrival time
                     time = rjobs[0]['at']
-                while True:
-                    if rjobs and rjobs[0]['at'] <= time: #add new processes to ready queue
+                while rjobs and rjobs[0]['at'] <= time: #add new processes to ready queue
                         ready_q.append(rjobs.pop(0))
-                    else:
-                        break
     
             #fetch job from ready_q
             if scheme == 'fcfs':
@@ -95,18 +95,20 @@ class CPUScheduler:
                     ready_q.remove(curr_job)
                 elif preemptive:
                     curr_job_ = pred(ready_q, key = lambda j : j[criterion])
-                    if curr_job_[criterion] < curr_job[criterion]:
+                    if (curr_job_[criterion] == curr_job[criterion] and \
+                        self.jobs[curr_job_['pid']]['at'] < self.jobs[curr_job['pid']]['at']) or \
+                        (pred == min and curr_job_[criterion] < curr_job[criterion]) or \
+                        (pred == max and curr_job_[criterion] > curr_job[criterion]):
                         ready_q.append(curr_job)
                         ready_q.remove(curr_job_)
                         curr_job = curr_job_
             elif scheme == 'rr':
                 if curr_job is None:
                     curr_job = ready_q.pop(0)
-                else:
-                    if ready_q:
-                        ready_q.append(curr_job)
-                        curr_job_ = ready_q.pop(0)
-                        curr_job = curr_job_
+                elif ready_q:
+                    ready_q.append(curr_job)
+                    curr_job_ = ready_q.pop(0)
+                    curr_job = curr_job_
 
             et = time + curr_job['bt']  #end time
             btl = 0 #burst time left
@@ -125,10 +127,7 @@ class CPUScheduler:
             if prog and prog[-1]['pid'] == curr_job['pid']:
                 prog[-1]['et'] = et
             else:
-                prog.append({'pid' : curr_job['pid'], 
-                             'st' : time,
-                             'et' : et,
-                            })
+                prog.append({'pid' : curr_job['pid'], 'st' : time, 'et' : et})
 
             if curr_job['bt'] == 0: #when a job is completed
                 pid = curr_job['pid']
@@ -136,13 +135,13 @@ class CPUScheduler:
                 summary[pid]['wt'] = summary[pid]['tat'] - self.jobs[pid]['bt']
                 for prg in prog:
                     if pid == prg['pid']:
-                        summary[pid]['rt'] = prg['st'] - self.jobs[pid]['at']
+                        summary[pid]['rt'] = prg['et'] - self.jobs[pid]['at']
                         break
                 cnt_job_done += 1
                 curr_job = None
 
             time = et
-        return prog, summary
+        return prog, summary 
 
 class ProcessGnattChart:    
     def transform(self, prog, gnt = None, title = 'cpu scheduling'):
@@ -183,7 +182,6 @@ if __name__ == '__main__':
                         pid = ['P1', 'P2', 'P3', 'P4', 'P5', 'P6'])
     
     fig, gnt = plt.subplots(ncols = 2, nrows = 3, figsize = (15, 15))
-    gcts = []
     pgc = ProcessGnattChart()
     for i, (algo, pre, tq) in enumerate(zip(['fcfs', 'sjf', 'sjf', 'min_priority', 'min_priority', 'rr'], 
                                             [False, False, True, False, True, False], 
@@ -191,3 +189,10 @@ if __name__ == '__main__':
         prog, summary = cpus2.transform(scheme = algo, preemptive = pre, time_quantum = tq)
         pgc.transform(prog, gnt = gnt[i // 2, i % 2], title = algo)
     plt.show(fig)
+    
+    import pandas as pd
+    cpus3 = CPUScheduler(burst_time = [5, 3, 3, 1],
+                         arrival_time = [0, 1, 2, 4], 
+                         pid = ['P1', 'P2', 'P3', 'P4'])
+    prog, summ = cpus3.transform(scheme = 'sjf', preemptive = True, time_quantum = 1)
+    print(pd.DataFrame(summ))
